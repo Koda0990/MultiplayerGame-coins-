@@ -2,7 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
-using JetBrains.Annotations;
 using Photon.Realtime;
 
 public class photonconnection : MonoBehaviourPunCallbacks
@@ -27,6 +26,7 @@ public class photonconnection : MonoBehaviourPunCallbacks
     public override void OnJoinedRoom()
     {
         print("ya entró"); 
+        PhotonNetwork.Instantiate("Square", new Vector2(0,0), Quaternion.identity);
         
     }
     public override void OnCreateRoomFailed(short returnCode, string message)

@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+using Photon.Pun; 
 public class Movement : MonoBehaviour
 {
     float xmov;
@@ -17,6 +17,7 @@ public class Movement : MonoBehaviour
         Mov, MovIzq, MovDer, MovBack,
     }
     private Estado estado;
+    PhotonView m_PV; 
 
     // Start is called before the first frame update
     void Start()
@@ -24,60 +25,67 @@ public class Movement : MonoBehaviour
         rb= GetComponent<Rigidbody2D>();
         animator = GetComponent<Animator>();
         estado = Estado.Idle;
+        m_PV = GetComponent<PhotonView>();
     }
 
     // Update is called once per frame
     void Update()
     {
-        xmov = Input.GetAxis("Horizontal");
-        ymov = Input.GetAxis("Vertical"); 
-        mov = new Vector2 (xmov, ymov).normalized;
+        if (m_PV.IsMine)
+        {
+            xmov = Input.GetAxis("Horizontal");
+            ymov = Input.GetAxis("Vertical");
+            mov = new Vector2(xmov, ymov).normalized;
+        }
     
     }
     
     private void FixedUpdate()
     {
-        //rb.velocity = new Vector2(xMov, ymov).normalized * movSpeed;
-       rb.MovePosition(rb.position + mov * movSpeed * Time.fixedDeltaTime);
-        if (ymov != 0)
+        if (m_PV.IsMine)
         {
-            if (ymov > 0)
+            //rb.velocity = new Vector2(xMov, ymov).normalized * movSpeed;
+            rb.MovePosition(rb.position + mov * movSpeed * Time.fixedDeltaTime);
+            if (ymov != 0)
             {
-                CambiarAnimacion(Estado.MovBack);
+                if (ymov > 0)
+                {
+                    CambiarAnimacion(Estado.MovBack);
+                }
+                if (ymov < 0)
+                {
+                    CambiarAnimacion(Estado.Mov);
+                }
             }
-            if (ymov < 0)
+            else if (xmov != 0)
             {
-                CambiarAnimacion(Estado.Mov);
+                if (xmov > 0)
+                {
+                    CambiarAnimacion(Estado.MovDer);
+                }
+                if (xmov < 0)
+                {
+                    CambiarAnimacion(Estado.MovIzq);
+                }
             }
-        }
-        else if (xmov != 0)
-        {
-            if (xmov > 0)
+            else if (xmov == 0 && ymov == 0)
             {
-                CambiarAnimacion(Estado.MovDer);
-            }
-            if (xmov < 0)
-            {
-                CambiarAnimacion(Estado.MovIzq);
-            }
-        }
-        else if (xmov == 0 && ymov == 0)
-        {
-            if (estado == Estado.MovIzq)
-            {
-                CambiarAnimacion(Estado.IdleIzq);
-            }
-            if (estado == Estado.MovDer)
-            {
-                CambiarAnimacion(Estado.IdleDer);
-            }
-            if (estado == Estado.MovBack)
-            {
-                CambiarAnimacion(Estado.IdleBack);
-            }
-            if (estado == Estado.Mov)
-            {
-                CambiarAnimacion(Estado.Idle);
+                if (estado == Estado.MovIzq)
+                {
+                    CambiarAnimacion(Estado.IdleIzq);
+                }
+                if (estado == Estado.MovDer)
+                {
+                    CambiarAnimacion(Estado.IdleDer);
+                }
+                if (estado == Estado.MovBack)
+                {
+                    CambiarAnimacion(Estado.IdleBack);
+                }
+                if (estado == Estado.Mov)
+                {
+                    CambiarAnimacion(Estado.Idle);
+                }
             }
         }
     }
